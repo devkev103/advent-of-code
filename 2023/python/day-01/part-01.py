@@ -18,8 +18,10 @@ for line in input:
             if position != -1:
                 positions.append(Position(searchfor, position))
                 position += 1
-
+    # sort array in place
     positions.sort(reverse=False, key=lambda x: x.position)
+
+    # take first and last positions in array; concatenate them together; convert to int and add to total
     total += int(positions[0].searchfor + positions[len(positions)-1].searchfor)
 
 print('Consider your entire calibration document.')
