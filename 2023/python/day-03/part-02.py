@@ -1,7 +1,9 @@
+# absolute mess .....
+
 import logging, sys
 logging.basicConfig(stream=sys.stderr, level=logging.DEBUG)
 
-input = open("./2023/python/day-03/input-sample.txt")
+input = open("./2023/python/day-03/input.txt")
 sum_of_number_parts = 0
 
 class Coordinate:
@@ -10,8 +12,26 @@ class Coordinate:
     self.y = y
     self.value = ""
 
+  def is_equal(self, coordinate) -> bool:
+     if self.x == coordinate.x and self.y == coordinate.y:
+        return True
+     else:
+        return False
+
   def __repr__(self):
     return f"row: {self.x}; col: {self.y}; value: {self.value}"
+
+class GearRatio:
+  def __init__(self, coordinate):
+     self.coordinate = coordinate
+     self.has_star = False
+     self.values = []
+  def add_gear(self, has_star, value):
+        if not self.has_star:
+          self.has_star = has_star
+        self.values.append(int(value))
+  def __repr__(self):
+     return f"coordinate: {self.coordinate}; has_star: {self.has_star}; values: {self.values}"
 
 class EnginePart:
   def __init__(self):
@@ -19,15 +39,7 @@ class EnginePart:
         self.value = ""
         self.has_symbol = False
         self.has_star_symbol = False
-        self.valid_coordinates = []
-
-class GearRatio:
-  values = []
-  def __init__(self, x, y, has_star_symbol, value):
-        self.coordinates = Coordinate(x, y)
-        self.has_star_symbol = has_star_symbol
-        self.values.append(value)
-        
+        self.valid_coordinates = []       
 
   def get_value(self):
      return int(self.value)
@@ -136,30 +148,32 @@ for row in grid.grid:
 # part 01
 for engine_part in engine_parts:
     engine_part.check_for_symbol()
-    if engine_part.has_symbol:
-      sum_of_number_parts += engine_part.get_value()
 
-gear_ratio = []
+gear_ratio_sum = 0
+
+gear_ratios = []
 
 for engine_part in engine_parts:
    for coordinate in engine_part.valid_coordinates:
-      GearRatio()
-
-
-for x in range(0, len(engine_parts)):
-  logging.debug(f"x: {engine_parts[x]}")
-  for y in range(x+1, len(engine_parts)):
-      logging.debug(f"  y: {engine_parts[y]}")
-
-      if engine_parts[x].has_star_symbol and engine_parts[y].has_star_symbol:
-         for x_gear in engine_parts[x].valid_coordinates:
-            for y_gear in engine_parts[y].valid_coordinates:
-               if x_gear.x == y_gear.x and x_gear.y == y_gear.y:
-                  logging.debug(f"gear ratio: {engine_parts[x].value} * {engine_parts[y].value}")
+      has_been_added = False
+      for gear_ratio in gear_ratios:
+         if gear_ratio.coordinate.is_equal(coordinate):
+          has_been_added = True
+          gear_ratio.add_gear(engine_part.has_star_symbol, engine_part.value)
       
-   
+      if not has_been_added:
+        gear_ratio = GearRatio(coordinate)
+        gear_ratio.add_gear(engine_part.has_star_symbol, engine_part.value)
+        gear_ratios.append(gear_ratio)
+
+logging.debug(gear_ratios)
+
+for gear_ratio in gear_ratios:
+   if gear_ratio.has_star and len(gear_ratio.values) == 2:
+      logging.debug(f"gear ratio: {gear_ratio.values[0]} * {gear_ratio.values[1]} = {gear_ratio.values[0] * gear_ratio.values[1]}")
+      gear_ratio_sum += gear_ratio.values[0] * gear_ratio.values[1]   
      
 
 logging.info(engine_parts)
 
-logging.info(f"What is the sum of all of the gear ratios in your engine schematic? {sum_of_number_parts}")
+logging.info(f"What is the sum of all of the gear ratios in your engine schematic? {gear_ratio_sum}")
