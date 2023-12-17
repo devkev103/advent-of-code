@@ -1,7 +1,7 @@
 import logging, sys
 logging.basicConfig(stream=sys.stderr, level=logging.DEBUG)
 
-input = open("./2023/python/day-03/input.txt")
+input = open("./2023/python/day-03/input-sample.txt")
 sum_of_number_parts = 0
 
 class Coordinate:
@@ -19,18 +19,27 @@ class EnginePart:
         self.value = ""
         self.has_symbol = False
         self.has_star_symbol = False
-        self.star_symbol_coordinates = []
         self.valid_coordinates = []
+
+class GearRatio:
+  values = []
+  def __init__(self, x, y, has_star_symbol, value):
+        self.coordinates = Coordinate(x, y)
+        self.has_star_symbol = has_star_symbol
+        self.values.append(value)
+        
 
   def get_value(self):
      return int(self.value)
   
   def __repr__(self):
-    return f"value: {self.value}; has_symbol: {self.has_symbol}; coordinate: {self.valid_coordinates}"
+    return f"value: {self.value}; has_symbol: {self.has_symbol}; has_star_symbol: {self.has_star_symbol}; coordinate: {self.valid_coordinates}"
   
   def check_for_symbol(self):
     if len(self.valid_coordinates) > 0:
-      self.has_symbol = True
+      self.has_symbol = True   
+    if len([x for x in self.valid_coordinates if x.value == "*"]) > 0:
+       self.has_star_symbol = True
 
 class Grid:
   grid = []
@@ -77,6 +86,17 @@ class Grid:
 
     return valid_coordinates
 
+  def append_valid_coordinates(self, engine_part, coordinates):
+     for coordinate in coordinates:
+        should_add = True
+        for engine_coordinate in engine_part.valid_coordinates:
+           if engine_coordinate.x == coordinate.x and engine_coordinate.y == coordinate.y:
+              logging.debug("coordinate has already been added")
+              should_add = False
+        if should_add:
+           engine_part.valid_coordinates.append(coordinate)
+     
+
   def get_engine_parts(self):
      engine_parts = []
 
@@ -89,8 +109,9 @@ class Grid:
               engine_part.coordinates.append(Coordinate(row, col))
               engine_part.value += self.grid[row][col]
               coordinates_with_symbols = self.get_valid_coordinates(self.get_potential_coordinates(Coordinate(row, col)))
-              if len(coordinates_with_symbols) > 0:
-                engine_part.valid_coordinates.append(coordinates_with_symbols)
+              self.append_valid_coordinates(engine_part, coordinates_with_symbols)
+              # if len(coordinates_with_symbols) > 0:
+                # engine_part.valid_coordinates.append(*coordinates_with_symbols)
               logging.debug(engine_part.value)
               # if not engine_part.has_symbol:
                 # engine_part.has_symbol = self.check_for_symbol(Coordinate(row, col))
@@ -117,6 +138,27 @@ for engine_part in engine_parts:
     engine_part.check_for_symbol()
     if engine_part.has_symbol:
       sum_of_number_parts += engine_part.get_value()
+
+gear_ratio = []
+
+for engine_part in engine_parts:
+   for coordinate in engine_part.valid_coordinates:
+      GearRatio()
+
+
+for x in range(0, len(engine_parts)):
+  logging.debug(f"x: {engine_parts[x]}")
+  for y in range(x+1, len(engine_parts)):
+      logging.debug(f"  y: {engine_parts[y]}")
+
+      if engine_parts[x].has_star_symbol and engine_parts[y].has_star_symbol:
+         for x_gear in engine_parts[x].valid_coordinates:
+            for y_gear in engine_parts[y].valid_coordinates:
+               if x_gear.x == y_gear.x and x_gear.y == y_gear.y:
+                  logging.debug(f"gear ratio: {engine_parts[x].value} * {engine_parts[y].value}")
+      
+   
+     
 
 logging.info(engine_parts)
 
