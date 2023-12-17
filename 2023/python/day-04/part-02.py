@@ -1,7 +1,7 @@
 import logging, sys
-logging.basicConfig(stream=sys.stderr, level=logging.DEBUG)
+logging.basicConfig(stream=sys.stderr, level=logging.INFO)
 
-input = open("./2023/python/day-04/input-sample.txt")
+input = open("./2023/python/day-04/input.txt")
 
 class Cards:
     cards = []
@@ -59,23 +59,24 @@ for card in cards.cards:
     total_points += card.GetPoints()
 
 
-def recursion(all_cards, cards, total_cards_won) -> int:
-    logging.debug(total_cards_won)
+def recursion(all_cards, cards, total_cards) -> int:
     for card in cards:
         winning_cards = []
         for winning_card in card.cards_won:
             winning_cards.append(all_cards[winning_card-1])
             logging.debug(f"winning_cards: {winning_card}")
-        # total_cards_won += len(winning_cards)
+        total_cards += len(winning_cards)
         logging.debug(f"total won this round: {len(winning_cards)}")
-        logging.debug(f"total won: {total_cards_won}")
-        if len(winning_cards) > 0:
-            total_cards_won += recursion(all_cards, winning_cards, total_cards_won)
-        else:
-            return total_cards_won
+        logging.debug(f"total won: {total_cards}")
+        
+        total_cards = recursion(all_cards, winning_cards, total_cards)
+            
+    return total_cards
 
-total_cards_won = 0
-total_cards_won = recursion(cards.cards, cards.cards, total_cards_won)
+total_cards = 0
+total_cards = recursion(cards.cards, cards.cards, total_cards)
+
+total_cards += len(cards.cards)
 
 logging.info("Process all of the original and copied scratchcards until no more scratchcards are won.")
-logging.info(f"Including the original set of scratchcards, how many total scratchcards do you end up with? {total_cards_won}")
+logging.info(f"Including the original set of scratchcards, how many total scratchcards do you end up with? {total_cards}")
