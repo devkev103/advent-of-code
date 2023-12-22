@@ -1,7 +1,7 @@
 import logging, sys
 logging.basicConfig(stream=sys.stderr, level=logging.DEBUG)
 
-input = open("./2023/python/day-05/input-sample.txt")
+input = open("./2023/python/day-05/input.txt")
 
 class Map:
     
@@ -10,6 +10,17 @@ class Map:
         self.ranges = []
         for range_input in input[1:]:
             self.ranges.append(Range(range_input))
+
+    def GetLocation(self, initial_location):
+        for range in self.ranges:
+            new_location = range.GetLocation(initial_location)
+
+            if new_location != initial_location:
+                logging.debug("new location found")
+                return new_location
+            else:
+                initial_location = new_location
+        return initial_location
 
     def __repr__(self) -> str:
         return f"name: {self.name}; ranges: {self.ranges}"
@@ -20,6 +31,15 @@ class Range:
         self.destination_range_start = int(input_split[0])
         self.source_range_start =int(input_split[1])
         self.range_length = int(input_split[2])
+
+    def GetLocation(self, initial_location) -> int:
+        if self.source_range_start <= initial_location < self.source_range_start + self.range_length:
+            logging.debug(f"{initial_location} is in the range of {self.source_range_start} length {self.range_length}")
+            initial_location = initial_location - self.source_range_start  + self.destination_range_start
+            logging.debug(f"new location: {initial_location}")
+        else:
+            logging.debug(f"{initial_location} is not in the range of {self.source_range_start} length {self.range_length}")
+        return initial_location
         
     def __repr__(self) -> str:
         return f"dest_range_start: {self.destination_range_start}; source_range_start: {self.source_range_start}; range_length: {self.range_length}"
@@ -41,6 +61,17 @@ for line in input:
         map_input.append(line.strip())
         logging.debug(f"add line: {line.strip()}")
 
-for map in maps:
-    logging.debug(map)
-    logging.debug("")
+# parse the last map
+maps.append(Map(map_input))
+
+locations = []
+for location in seeds:
+    for map in maps:
+        logging.debug(map)
+        location = map.GetLocation(location)
+        logging.debug(f"current location: {location}")
+        logging.debug("")
+    locations.append(location)
+
+logging.debug(locations)
+logging.info(f"What is the lowest location number that corresponds to any of the initial seed numbers? {sorted(locations)[0]}")
